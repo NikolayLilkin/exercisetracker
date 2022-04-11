@@ -24,6 +24,24 @@ app.get('/hello', (req,res) => {
   res.json({message:"Hello my name is"});
 })
 
+app.post('/api/users',urlencodedParser,async function(req,res){
+  let dbUser = await usersModel.findOne({user:req.body.username});
+  if(dbUser === null){
+    let newCreatedUser= await usersModel.create({
+      user:req.body.username
+    });
+    console.log("Created new user " + req.body.username);
+    res.json({user:req.body.username,_id:newCreatedUser._id});
+  }
+  else{
+    res.json({user:dbUser.user,_id:dbUser._id});
+  }
+});
+
+app.get('/api/users',async function (req, res){
+  let users = await usersModel.find();
+  res.send(users);
+});
 
 mongoose.connection.once('open',() => {
   console.log("Connected to MongoDB");
