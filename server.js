@@ -16,9 +16,8 @@ var Users = new mongoose.Schema({username:String});
 var usersModel = mongoose.model("Users", Users);
 var Exercises = new mongoose.Schema({
   user:Users,
-  description: String,
-  duration: Number,
-  date: Date
+  count:Number,
+  log: []
 });
 var exerciesModel = mongoose.model("Exercises",Exercises);
 app.use(cors())
@@ -50,52 +49,74 @@ app.get('/api/users',async function (req, res){
 });
 
 app.post('/api/users/:_id/exercises',urlencodedParser,async function (req,res){
-  let regEx = /^\d{4}-\d{2}-\d{2}$/;
-  let user = await usersModel.findById(req.params._id);
-  console.log(user);
-  if(user === null){
-    res.send({Error:"No such id"});
+  let dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  let user;
+  try {
+    user = await usersModel.findById(req.params._id);
+  } catch (error) {
+    res.send({Error:"Invalid user"});
+    return
+  }
+  let description = req.body.description;
+  let duration = req.body.duration;
+  let date = req.body.date;
+  if(!(date.match(dateRegex)) && date !==""){
+    res.send({Error:"You entered unvalid date"})
+    return;
+  }
+  if(date === ""){
+    date = new Date();
   }
   else{
-    console.log("The date is " + req.body.date);
-    if(req.body.date === ""){
-      let newExercise = await exerciesModel({
-      user: user,
-      description: req.body.description,
-      duration: req.body.duration,
-      date: new Date()
-    });
-    console.log(newExercise);
-    res.send({username: newExercise.user.username,
-             description: newExercise.description,
-             duration: newExercise.duration,
-             date: newExercise.date.toDateString() 
-             });
-    }
-    else if(req.body.date.match(regEx)){
-      let newExercise = await exerciesModel({
-      user: user,
-      description: req.body.description,
-      duration: req.body.duration,
-      date: new Date()
-    });
-    console.log(newExercise);
-    res.send({username: newExercise.user.username,
-             description: newExercise.description,
-             duration: newExercise.duration,
-             date: newExercise.date.toDateString() 
-             });
-    }
-    else{
-      res.send({Error:"Invalid Date"});
-    }
-    
+    date = new Date(date);
   }
-  
-  //console.log(user.username);
-  //res.send(user);
+  let exerciesArray=await exerciesModel.findOne({user:user});
+  if(exerciesArray === null){
+    console.log("Creating new Item in the exerciesModel");
+    newExercies = await exerciesModel.create({
+      user:user,
+      count:1,
+      log:[{
+        description:description,
+        duration:duration,
+        date:date.toDateString()
+      }]
+    });
+    console.log("Newly created Exercise")
+    console.log(newExercies);
+  }
+  else{
+    let log=exerciesArray.log;
+    let count=exerciesArray.count;
+    log.push({description:description,
+              duration:duration,
+              date:date.toDateString()
+            });       
+    exerciesArray.log = log;
+    exerciesArray.count = count + 1;
+    await exerciesArray.save();
+    console.log("With old exercises");
+    console.log(exerciesArray); 
+  }
+  res.send({
+    user: user.username,
+    description: description,
+    duration: duration,
+    date: date.toDateString()
+  });
 });
 
+app.get('/api/users/:_id/logs',urlencodedParser,async function(req,res){
+  let user = await usersModel.findById((req.params._id));
+  if(user === null){
+    res.send({Error:"There is no such user"});
+    return
+  }
+  else{
+    let exerciesArray=await exerciesModel.findOne({user:user});
+    res.send(exerciesArray);
+  } 
+})
 
 mongoose.connection.once('open',() => {
   console.log("Connected to MongoDB");

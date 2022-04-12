@@ -1,0 +1,82 @@
+/*
+    let exerciesArray=await exerciesModel.findOne({user:user});
+    console.log(typeof exerciesArray);
+    if(exerciesArray === null){
+      if(req.body.date === ""){
+        let newExercise = await exerciesModel.create({
+          user: user,
+          count: 1,
+          log:[{
+            description: req.body.description,
+            duration: req.body.duration,
+            date: new Date()}]  
+          });
+        console.log("Created new newExercise with id " + newExercise.user._id);
+        console.log("The log items are " + newExercise.log[0]);
+        console.log("Sending the results");
+        res.send({username:newExercise.user.username,
+             count: newExercise.count,
+             duration: newExercise.log.duration,
+             date: newExercise.log.date,
+             _id: newExercise.user._id     
+        });
+      } else if(req.body.date.match(regEx)){
+        let newExercise = await exerciesModel.create({
+        user: user,
+        count: 1,
+        log:[{
+          description: req.body.description,
+          duration: req.body.duration,
+          date: new Date(req.body.date)
+        }]  
+        });
+        console.log("Created new newExercise");
+        console.log("Sending the results");
+        res.send({username: newExercise.user.username,
+             description: newExercise.log.description,
+             duration: newExercisel.log.duration,
+             date: newExercise.log.date.toDateString(),
+             _id:newExercise.user._id   
+             });
+      } else{
+        res.send({Error:"Invalid Date"});
+      }
+    }
+    else{
+      console.log("Here we are !!!!");
+      if(req.body.date === ""){
+        let logItem = {
+          description: req.body.description,
+          duration: req.body.duration,
+          date: new Date()
+        }
+        console.log(logItem);
+        console.log("Trying to push the item");
+        res.send({username:exerciesArray.user.username,
+          count: exerciesArray.count,
+          description: logItem.description,
+          duration: logItem.duration,
+          date: logItem.date.toDateString(),
+          _id: exerciesArray.user._id     
+          });
+      }
+      else if(req.body.date.match(regEx)){
+        let logItem = {
+          description: req.body.description,
+          duration: req.body.duration,
+          date: new Date()
+        }
+        console.log("Your are using the user "+logItem);
+        console.log("Trying to push the item");
+        res.send({username:exerciesArray.user.username,
+          count: newExercise.count,
+          description: logItem.description,
+          duration: logItem.duration,
+          date: logItem.date.toDateString(),
+          _id: exerciesArray.user._id     
+          });
+      }
+      else{
+        res.send({Error:"Invalid Date"});
+      }
+      */
